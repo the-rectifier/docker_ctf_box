@@ -10,9 +10,6 @@ RUN locale-gen
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-# RUN adduser --disabled-password --gecos '' pwner
-# RUN adduser pwner sudo
-
 RUN apt-get -y install \
     wget git gcc make gdb python3 python-is-python3 \
     python3-pip python3-dev libssl-dev libffi-dev \
@@ -26,7 +23,7 @@ RUN echo '%pwner ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER pwner
 WORKDIR /home/pwner
 
-COPY .zshrc /home/pwner/.zshrc
+ENV PATH /home/pwner/.local/bin:$PATH
 
 RUN git clone https://github.com/pwndbg/pwndbg /home/pwner/pwndbg && cd /home/pwner/pwndbg && ./setup.sh
 
@@ -37,5 +34,10 @@ RUN wget --no-check-certificate https://github.com/robbyrussell/oh-my-zsh/raw/ma
 RUN python -m pip install --upgrade pip
 
 RUN python -m pip install --upgrade pwntools
+
+COPY .zshrc /home/pwner/.zshrc
+
+ENV LC_CTYPE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
 
 ENTRYPOINT ["/bin/zsh"]

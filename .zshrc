@@ -83,8 +83,6 @@ source $ZSH/oh-my-zsh.sh
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
-export PATH=/home/pwner/.local/bin:$PATH
-
 # ssh
 # export SSH_KEY_PATH="~/.ssh/rsa_id"
 
