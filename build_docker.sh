@@ -5,4 +5,4 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-docker build $(pwd) -t ubuntu_ctf
+docker build $(pwd) -t $1

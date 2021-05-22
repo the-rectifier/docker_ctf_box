@@ -10,12 +10,17 @@ RUN locale-gen
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-RUN apt-get -y install \
-    wget git gcc make gdb python3 python-is-python3 \
+RUN apt-get -y update && apt-get -y install \
+    wget curl git gcc make gdb python3 python-is-python3 \
     python3-pip python3-dev libssl-dev libffi-dev \
-    build-essential sudo vim nano zsh
+    build-essential vim nano zsh sudo \
+    nasm binutils-multiarch llvm clang \
+    libreadline-dev libtool ruby netcat openvpn sshpass \
+    ruby-dev openssl openssh-server openssh-client libmpc-dev
 
 RUN chsh -s /bin/zsh
+
+RUN gem install seccomp-tools one_gadget
 
 RUN useradd -ms /bin/zsh pwner
 RUN echo '%pwner ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -23,21 +28,26 @@ RUN echo '%pwner ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER pwner
 WORKDIR /home/pwner
 
+COPY .zshrc /home/pwner/.zshrc
+
+ENV LC_CTYPE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
 ENV PATH /home/pwner/.local/bin:$PATH
 
 RUN git clone https://github.com/pwndbg/pwndbg /home/pwner/pwndbg && cd /home/pwner/pwndbg && ./setup.sh
 
 RUN echo "source /home/pwner/pwndbg/gdbinit.py" >> /home/pwner/.gdbinit
 
-RUN wget --no-check-certificate https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
+RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 RUN python -m pip install --upgrade pip
 
-RUN python -m pip install --upgrade pwntools
+RUN python -m pip install --upgrade pwntools ROPGadget numpy
 
-COPY .zshrc /home/pwner/.zshrc
+RUN mkdir /home/pwner/ctf_tools/
 
-ENV LC_CTYPE=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
+RUN git clone https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite.git /home/pwner/ctf_tools/peas/
+
+WORKDIR /home/pwner
 
 ENTRYPOINT ["/bin/zsh"]
